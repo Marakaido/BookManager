@@ -6,7 +6,7 @@ import data.entities.Book;
 import ui.UI;
 
 import javax.persistence.EntityExistsException;
-import java.util.InputMismatchException;
+import javax.persistence.EntityNotFoundException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -45,23 +45,14 @@ public class CommandHandler
             (addCommand) -> {
                 if(!addCommand.equals("add")) return false;
 
-                Book book = UI.getBook();
-                if(book != null)
+                try
                 {
-                    try
-                    {
-                        getBookRepository().save(book);
-                        UI.print("Book " + book + " was successfully added");
-                    }
-                    catch(EntityExistsException e)
-                    {
-                        UI.printError("Failed to add book: book already exists");
-                    }
+                    Book book = UI.getBook();
+                    getBookRepository().save(book);
+                    UI.print("Book " + book + " was successfully added");
                 }
-                else
-                {
-                    UI.printError("Error: cannot parse book");
-                }
+                catch(EntityExistsException e) { UI.printError("Failed to add book: book already exists"); }
+                catch(IllegalStateException e) { UI.printError("Wrong book format"); }
 
                 return true;
             },
@@ -69,17 +60,15 @@ public class CommandHandler
             (removeCommand) -> {
                 if(!removeCommand.equals("remove")) return false;
 
+                Book book = null;
                 try
                 {
-                    long id = UI.getId();
-                    Book book = getBookRepository().get(id);
-                    if(book != null)
-                    {
-                        getBookRepository().delete(book);
-                        UI.print("Book" + book + " was successfully removed");
-                    }
+                    book = UI.getBook();
+                    getBookRepository().delete(book);
+                    UI.print("Book" + book + " was successfully removed");
                 }
-                catch(InputMismatchException e) { UI.printError("Wrong id format"); }
+                catch (EntityNotFoundException e) { UI.printError("Book " + book + " doesn't exist"); }
+                catch(IllegalStateException e) { UI.printError("Wrong book format"); }
 
                 return true;
             },
@@ -87,26 +76,19 @@ public class CommandHandler
             (updateCommand) -> {
                 if(!updateCommand.equals("update")) return false;
 
-                UI.print("$id: ");
+                Book book = null;
                 try
                 {
-                    long id = UI.getId();
-                    Book book = getBookRepository().get(id);
+                    book = UI.getBook();
+                    if(!getBookRepository().exists(book)) throw new EntityNotFoundException();
 
-                    if(book != null)
-                    {
-                        UI.print("$new data: ");
-                        Book editedBook = UI.getBook();
-                        if(editedBook != null)
-                        {
-                            editedBook = getBookRepository().update(id, editedBook);
-                            UI.print("Book " + editedBook + " was successfully edited");
-                        }
-                        else UI.printError("Error: cannot parse book");
-                    }
-                    else UI.printError("Book with id [" + id + "] doesn't exist");
+                    UI.print("$new data: ");
+                    Book editedBook = UI.getBook();
+                    editedBook = getBookRepository().update(book, editedBook);
+                    UI.print("Book " + editedBook + " was successfully edited");
                 }
-                catch(InputMismatchException e) { UI.printError("Wrong id format"); }
+                catch (EntityNotFoundException e) { UI.printError("Book " + book + " doesn't exist"); }
+                catch(IllegalStateException e) { UI.printError("Wrong book format"); }
 
                 return true;
             },
@@ -119,6 +101,7 @@ public class CommandHandler
 
                 books.sort((a, b) -> a.getName().compareTo(b.getName()));
                 for(Book book : books) UI.print("\t" + book);
+
                 return true;
             },
 

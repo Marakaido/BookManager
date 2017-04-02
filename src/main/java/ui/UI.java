@@ -6,6 +6,7 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.InputMismatchException;
+import java.util.IllegalFormatException;
 
 /**
  * @author marakaido
@@ -26,6 +27,7 @@ public class UI
 
     /**
      * Parses next book
+     * @throws IllegalStateException When the book couldn't be parsed
      * @return Parsed book or null, if it couldn't be parsed
      */
     public static Book getBook()
@@ -35,7 +37,7 @@ public class UI
         Matcher matcher = pattern.matcher(line);
         if(matcher.find())
             return new Book(matcher.group(2).trim(), matcher.group(1).trim());
-        else return null;
+        else throw new IllegalStateException();
     }
 
     /**

@@ -6,6 +6,7 @@ import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.TypedQuery;
+import java.util.List;
 
 /**
  * @author marakaido
@@ -18,6 +19,19 @@ public class BookRepository implements CRUDRepository<Book, Long>
     public BookRepository(EntityManager entityManager)
     {
         this.entityManager = entityManager;
+    }
+
+    /**
+     * Returns book from database that equals to given book
+     * @param value Book value, based on which book from database will be returned
+     * @return Book with same fields as in value or null, if no such book exists
+     */
+    public Book getBookEqualsTo(Book value)
+    {
+        TypedQuery<Book> query = entityManager.createQuery("SELECT book FROM Book book WHERE book.name = '"+value.getName()+"' AND book.author = '"+value.getAuthor()+"'", Book.class);
+        List<Book> result = query.getResultList();
+        if(result.size() == 1) return result.get(0);
+        else return null;
     }
 
     /**
@@ -38,9 +52,9 @@ public class BookRepository implements CRUDRepository<Book, Long>
      * @see CRUDRepository
      */
     @Override
-    public Book update(Long id, Book newValue)
+    public Book update(Book oldValue, Book newValue)
     {
-        Book book = entityManager.find(Book.class, id);
+        Book book = getBookEqualsTo(oldValue);
         if(book == null) throw new EntityNotFoundException();
 
         entityManager.getTransaction().begin();
@@ -57,10 +71,11 @@ public class BookRepository implements CRUDRepository<Book, Long>
     @Override
     public void delete(Book entity)
     {
-        if(!exists(entity)) throw new EntityNotFoundException();
+        Book book = getBookEqualsTo(entity);
+        if(book == null) throw new EntityNotFoundException();
 
         entityManager.getTransaction().begin();
-        entityManager.remove(entity);
+        entityManager.remove(book);
         entityManager.getTransaction().commit();
     }
 
@@ -79,10 +94,7 @@ public class BookRepository implements CRUDRepository<Book, Long>
     @Override
     public boolean exists(Book entity)
     {
-        TypedQuery<Book> query = entityManager.createQuery(
-                "SELECT book FROM Book book WHERE book.name = '" + entity.getName() + "' AND book.author = '" + entity.getAuthor() + "'",
-                Book.class);
-        return query.getResultList().size() == 1;
+        return getBookEqualsTo(entity) != null;
     }
 
     /**
