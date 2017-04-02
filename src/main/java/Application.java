@@ -9,9 +9,15 @@ import ui.UI;
  */
 public class Application
 {
-    public Application(CommandHandler commandHandler)
+    /**
+     * User interface of the application
+     */
+    public final UI ui;
+
+    public Application(CommandHandler commandHandler, UI ui)
     {
         this.commandHandler = commandHandler;
+        this.ui = ui;
     }
 
     /**
@@ -19,13 +25,14 @@ public class Application
      */
     public void start()
     {
-        UI.print("Welcome to Book Manager!");
-        String command = UI.getCommand();
+        ui.print("Welcome to Book Manager!");
+        String command = ui.getCommand();
         while(!command.equals("exit"))
         {
             commandHandler.resolve(command);
-            command = UI.getCommand();
+            command = ui.getCommand();
         }
     }
+
     private CommandHandler commandHandler;
 }
