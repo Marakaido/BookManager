@@ -7,6 +7,7 @@ import ui.UI;
 
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityNotFoundException;
+import java.util.InputMismatchException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -63,12 +64,17 @@ public class CommandHandler
                 Book book = null;
                 try
                 {
-                    book = UI.getBook();
+                    String name = UI.getBookName();
+                    List<Book> books = getBookRepository().getBooksByName(name);
+                    if(books.size() == 0) throw new EntityNotFoundException();
+                    else if(books.size() == 1) book = books.get(0);
+                    else book = UI.specify(books);
                     getBookRepository().delete(book);
                     UI.print("Book" + book + " was successfully removed");
                 }
                 catch (EntityNotFoundException e) { UI.printError("Book " + book + " doesn't exist"); }
                 catch(IllegalStateException e) { UI.printError("Wrong book format"); }
+                catch(InputMismatchException e) { UI.printError("Wrong id");}
 
                 return true;
             },
@@ -79,8 +85,11 @@ public class CommandHandler
                 Book book = null;
                 try
                 {
-                    book = UI.getBook();
-                    if(!getBookRepository().exists(book)) throw new EntityNotFoundException();
+                    String name = UI.getBookName();
+                    List<Book> books = getBookRepository().getBooksByName(name);
+                    if(books.size() == 0) throw new EntityNotFoundException();
+                    else if(books.size() == 1) book = books.get(0);
+                    else book = UI.specify(books);
 
                     UI.print("$new data: ");
                     Book editedBook = UI.getBook();
@@ -89,6 +98,7 @@ public class CommandHandler
                 }
                 catch (EntityNotFoundException e) { UI.printError("Book " + book + " doesn't exist"); }
                 catch(IllegalStateException e) { UI.printError("Wrong book format"); }
+                catch(InputMismatchException e) { UI.printError("Wrong id");}
 
                 return true;
             },

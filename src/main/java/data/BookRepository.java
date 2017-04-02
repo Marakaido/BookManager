@@ -35,6 +35,34 @@ public class BookRepository implements CRUDRepository<Book, Long>
     }
 
     /**
+     * Finds books by specified name
+     * @param name Name of the books to be found
+     * @return Books with specified name
+     */
+    public List<Book> getBooksByName(String name)
+    {
+        return entityManager
+                .createQuery(
+                    "SELECT book FROM Book book WHERE book.name = '"+name+"'",
+                    Book.class)
+                .getResultList();
+    }
+
+    /**
+     * Finds books by author
+     * @param author Author of the books to be found
+     * @return Books with specified author
+     */
+    public List<Book> getBooksByAuthor(String author)
+    {
+        return entityManager
+                .createQuery(
+                        "SELECT book FROM Book book WHERE book.author = '"+author+"'",
+                        Book.class)
+                .getResultList();
+    }
+
+    /**
      * @see CRUDRepository
      */
     @Override
