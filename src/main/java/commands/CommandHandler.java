@@ -99,6 +99,7 @@ public class CommandHandler
                 catch (EntityNotFoundException e) { UI.printError("Book " + book + " doesn't exist"); }
                 catch(IllegalStateException e) { UI.printError("Wrong book format"); }
                 catch(InputMismatchException e) { UI.printError("Wrong id");}
+                catch(EntityExistsException e) { UI.printError("Couldn't complete operation, book with such value already exists");}
 
                 return true;
             },

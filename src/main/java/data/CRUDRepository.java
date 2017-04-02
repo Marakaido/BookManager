@@ -26,6 +26,7 @@ public interface CRUDRepository<T, ID>
      * @param oldValue Detached entity that specifies which entity to update
      * @param newValue Entity that contains new value for entity that will be edited
      * @throws EntityNotFoundException if entity with same fields as oldValue doesn't exist
+     * @throws EntityExistsException if new value of the entity already exists
      * @return Updated entity
      */
     T update(T oldValue, T newValue);

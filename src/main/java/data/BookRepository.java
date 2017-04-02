@@ -84,6 +84,7 @@ public class BookRepository implements CRUDRepository<Book, Long>
     {
         Book book = getBookEqualsTo(oldValue);
         if(book == null) throw new EntityNotFoundException();
+        else if(exists(newValue)) throw new EntityExistsException();
 
         entityManager.getTransaction().begin();
         book.setName(newValue.getName());
